@@ -1,6 +1,7 @@
 package com.example.dogslist
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -27,7 +28,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
+        viewModel.viewStateLD.observe(this) { handleViewState(it) }
         viewModel.dogDataLD.observe(this) { dogAdapter.setData(it) }
+    }
+
+    private fun handleViewState(viewState: BaseViewState) {
+        when (viewState) {
+            is BaseViewState.Loading -> {
+                binding.progressView.root.visibility = View.VISIBLE
+            }
+
+            is BaseViewState.Ready -> {
+                binding.progressView.root.visibility = View.GONE
+            }
+
+            is BaseViewState.Failure -> {
+                showError(viewState.exception.message.toString())
+            }
+        }
     }
 
     private fun setupSearchView() {
@@ -54,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showError() {
-        Toast.makeText(this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show()
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
